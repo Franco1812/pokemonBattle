@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css'; // Importar el archivo CSS
+import './App.css';
 import Header from './components/Header';
 import PokemonList from './components/PokemonList';
 import BattleResult from './components/BattleResult';
@@ -16,8 +16,8 @@ const App: React.FC = () => {
 
   const handleSelectPokemon = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon);
-    setOpponentPokemon(null); // Ocultar la tarjeta del oponente
-    setBattleResult(null); // Ocultar el resultado de la batalla
+    setOpponentPokemon(null); 
+    setBattleResult(null); 
   };
 
   const startBattle = () => {
@@ -26,12 +26,9 @@ const App: React.FC = () => {
         .then(response => {
           const winner = response.data.winner;
           const loser = response.data.loser;
-
-          // Determinar el oponente basado en el ID del Pokémon seleccionado
           const opponent = selectedPokemon.id === winner.id ? loser : winner;
           setOpponentPokemon(opponent);
 
-          // Mostrar el resultado de la batalla
           setBattleResult(`${winner.name} wins!`);
         })
         .catch(error => console.error(error));

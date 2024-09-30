@@ -20,27 +20,24 @@ export class BattleService {
 		let attacker = pokemon1;
 		let defender = pokemon2;
 
-		// Determinar el primer atacante basado en velocidad y ataque
+		// Logica para determinar quien gollpea primero
 		if (pokemon2.speed > pokemon1.speed || (pokemon2.speed === pokemon1.speed && pokemon2.attack > pokemon1.attack)) {
 			attacker = pokemon2;
 			defender = pokemon1;
 		}
 
-		// Lógica de batalla
+		// Logica de pelea
 		while (pokemon1.hp > 0 && pokemon2.hp > 0) {
 			// Calcular daño
 			const damage = Math.max(attacker.attack - defender.defense, 1);
 			defender.hp -= damage;
-
-			// Intercambiar roles
 			[attacker, defender] = [defender, attacker];
 		}
 
-		// Determinar el ganador
+		// Logica para el ganador
 		const winner = pokemon1.hp > 0 ? pokemon1 : pokemon2;
 		const loser = pokemon1.hp > 0 ? pokemon2 : pokemon1;
 
-		// Guardar el resultado de la batalla
 		const result = new BattleResult();
 		result.winner = winner;
 		result.loser = loser;
