@@ -1,63 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { BattleResult } from '../battle-result/entities/battle-result.entity';
+import { Repository, Not } from 'typeorm';
 import { Pokemon } from '../pokemon/entities/pokemon.entity';
+import { BattleDto } from './dto/battle.dto';
 
 @Injectable()
 export class BattleService {
-	constructor(
-		@InjectRepository(BattleResult)
-		private readonly battleResultRepository: Repository<BattleResult>,
-		@InjectRepository(Pokemon)
-		private readonly pokemonRepository: Repository<Pokemon>,
-	) {}
+  constructor(
+    @InjectRepository(Pokemon)
+    private readonly pokemonRepository: Repository<Pokemon>,
+  ) {}
 
-	async startBattle(battleDto: { pokemon1Id: string }): Promise<{ winner: { id: string, name: string }, opponent: { id: string, name: string } }> {
-		const pokemon1 = await this.findPokemonById(battleDto.pokemon1Id);
-		const pokemon2 = await this.findRandomOpponent();
+  async startBattle(battleDto: BattleDto): Promise<{ winner: Pokemon, loser: Pokemon, id: number }> {
+    const { pokemon1Id } = battleDto;
+    const selectedPokemon = await this.findPokemonById(pokemon1Id);
+    if (!selectedPokemon) {
+      throw new Error('Pokémon no encontrado');
+    }
 
-		let attacker = pokemon1;
-		let defender = pokemon2;
+    const opponentPokemon = await this.findRandomOpponent(pokemon1Id);
 
-		// Logica para determinar quien gollpea primero
-		if (pokemon2.speed > pokemon1.speed || (pokemon2.speed === pokemon1.speed && pokemon2.attack > pokemon1.attack)) {
-			attacker = pokemon2;
-			defender = pokemon1;
-		}
+    const winner = Math.random() > 0.5 ? selectedPokemon : opponentPokemon;
+    const loser = winner.id === selectedPokemon.id ? opponentPokemon : selectedPokemon;
 
-		// Logica de pelea
-		while (pokemon1.hp > 0 && pokemon2.hp > 0) {
-			// Calcular daño
-			const damage = Math.max(attacker.attack - defender.defense, 1);
-			defender.hp -= damage;
-			[attacker, defender] = [defender, attacker];
-		}
+    // Incluir todas las propiedades del Pokémon en la respuesta
+    return {
+      winner,
+      loser,
+      id: Math.floor(Math.random() * 100), // Generar un ID aleatorio para la batalla
+    };
+  }
 
-		// Logica para el ganador
-		const winner = pokemon1.hp > 0 ? pokemon1 : pokemon2;
-		const loser = pokemon1.hp > 0 ? pokemon2 : pokemon1;
+  private async findPokemonById(id: string): Promise<Pokemon> {
+    return await this.pokemonRepository.findOne({ where: { id } });
+  }
 
-		const result = new BattleResult();
-		result.winner = winner;
-		result.loser = loser;
-
-		await this.battleResultRepository.save(result);
-
-		// Devolver el resultado de la batalla
-		return {
-			winner: { id: winner.id, name: winner.name },
-			opponent: { id: loser.id, name: loser.name }
-		};
-	}
-
-	private async findPokemonById(id: string): Promise<Pokemon> {
-		return await this.pokemonRepository.findOne({ where: { id } });
-	}
-
-	private async findRandomOpponent(): Promise<Pokemon> {
-		const pokemons = await this.pokemonRepository.find();
-		const randomIndex = Math.floor(Math.random() * pokemons.length);
-		return pokemons[randomIndex];
-	}
+  private async findRandomOpponent(excludeId: string): Promise<Pokemon> {
+    const pokemons = await this.pokemonRepository.find({ where: { id: Not(excludeId) } });
+    const randomIndex = Math.floor(Math.random() * pokemons.length);
+    return pokemons[randomIndex];
+  }
 }

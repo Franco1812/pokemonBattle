@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import './App.css'; // Importar el archivo CSS
 import Header from './components/Header';
 import PokemonList from './components/PokemonList';
 import BattleResult from './components/BattleResult';
@@ -16,22 +16,32 @@ const App: React.FC = () => {
 
   const handleSelectPokemon = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon);
-    setOpponentPokemon(null); 
-    setBattleResult(null); 
+    setOpponentPokemon(null); // Ocultar la tarjeta del oponente
+    setBattleResult(null); // Ocultar el resultado de la batalla
   };
 
   const startBattle = () => {
     if (selectedPokemon) {
       axios.post('http://localhost:3000/battle', { pokemon1Id: selectedPokemon.id })
         .then(response => {
-          const winner = response.data.winner;
-          const loser = response.data.loser;
-          const opponent = selectedPokemon.id === winner.id ? loser : winner;
-          setOpponentPokemon(opponent);
+          const { winner, loser } = response.data;
 
+          // Verificar que la respuesta contenga los datos necesarios
+          if (!winner || !loser) {
+            console.error('La respuesta del servidor no contiene los datos esperados.');
+            return;
+          }
+
+          // Determinar el oponente basado en el ID del Pokémon seleccionado
+          const opponentPokemon = selectedPokemon.id === winner.id ? loser : winner;
+          setOpponentPokemon(opponentPokemon);
+
+          // Mostrar el resultado de la batalla
           setBattleResult(`${winner.name} wins!`);
         })
-        .catch(error => console.error(error));
+        .catch(error => {
+          console.error('Error al iniciar la batalla:', error);
+        });
     }
   };
 
