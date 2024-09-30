@@ -16,10 +16,10 @@ const App: React.FC = () => {
 
   const handleSelectPokemon = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon);
-    setOpponentPokemon(null); // Ocultar la tarjeta del oponente
-    setBattleResult(null); // Ocultar el resultado de la batalla
+    setOpponentPokemon(null); 
+    setBattleResult(null); 
   };
-
+  
   const startBattle = () => {
     if (selectedPokemon) {
       axios.post('http://localhost:3000/battle', { pokemon1Id: selectedPokemon.id })
@@ -32,7 +32,7 @@ const App: React.FC = () => {
             return;
           }
 
-          // Determinar el oponente basado en el ID del Pokémon seleccionado
+          // Determinar oponent
           const opponentPokemon = selectedPokemon.id === winner.id ? loser : winner;
           setOpponentPokemon(opponentPokemon);
 

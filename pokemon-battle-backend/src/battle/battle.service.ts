@@ -23,7 +23,6 @@ export class BattleService {
     const winner = Math.random() > 0.5 ? selectedPokemon : opponentPokemon;
     const loser = winner.id === selectedPokemon.id ? opponentPokemon : selectedPokemon;
 
-    // Incluir todas las propiedades del Pokémon en la respuesta
     return {
       winner,
       loser,

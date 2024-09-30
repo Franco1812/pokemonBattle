@@ -7,7 +7,6 @@ interface BattlePokemonCardProps {
 }
 
 const BattlePokemonCard: React.FC<BattlePokemonCardProps> = ({ pokemon }) => {
-  // Calcular el valor máximo de las estadísticas
   const maxStatValue = Math.max(pokemon.hp, pokemon.attack, pokemon.defense, pokemon.speed);
 
   return (
@@ -17,7 +16,7 @@ const BattlePokemonCard: React.FC<BattlePokemonCardProps> = ({ pokemon }) => {
         height="140"
         image={pokemon.imageUrl}
         alt={pokemon.name}
-        style={{ objectFit: 'contain' }} // Ajustar la imagen para que no se recorte
+        style={{ objectFit: 'contain' }} 
         onError={(e) => {
           (e.target as HTMLImageElement).src = 'https://via.placeholder.com/140';
         }}
